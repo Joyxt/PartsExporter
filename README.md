@@ -1,0 +1,2 @@
+# PartsExporter
+This MaxScript script for 3ds Max automates data extraction and the export of 3D models. It generates a text file containing the coordinates of the selected objects and simultaneously exports each object as an individual .fbx file.

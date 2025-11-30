@@ -1,71 +1,71 @@
-# PartsExporter
-This MaxScript script for 3ds Max automates data extraction and the export of 3D models. It generates a text file containing the coordinates of the selected objects and simultaneously exports each object as an individual .fbx file.
 
+# Blender Add-on: Batch Coords & FBX Exporter
 
-Voici une proposition de fichier `README.md` (format standard pour GitHub) prêt à être copié-collé.
-
-J'ai structuré le document pour qu'il soit clair, professionnel et qu'il explique bien les prérequis (comme le réglage de l'export FBX).
-
------
-
-# 3ds Max Batch Exporter: Coords & FBX
-
-Ce script MaxScript pour **3ds Max** permet d'automatiser l'extraction de données et l'export de modèles 3D. Il génère un fichier texte contenant les coordonnées des objets sélectionnés et exporte simultanément chaque objet en fichier `.fbx` individuel.
+Un Add-on simple et efficace pour **Blender** qui automatise l'exportation de données de position et de fichiers modèles en masse. Idéal pour les pipelines de jeu vidéo ou l'intégration technique.
 
 ## 🚀 Fonctionnalités
 
-1.  **Tri Alphabétique** : Trie automatiquement les objets sélectionnés par nom (ex: `Mirror_00`, `Mirror_01`) avant le traitement.
-2.  **Génération de Log (TXT)** : Crée un fichier texte unique répertoriant :
-      * Le nom de l'objet.
-      * Ses coordonnées (X, Y, Z) en position Monde (World).
-      * Formatage précis : Arrondi à **3 décimales**.
-3.  **Batch Export FBX** : Exporte chaque objet sélectionné dans un fichier `.fbx` séparé, situé dans le même dossier que le fichier texte.
+  * **Interface Intégrée** : Accessible directement via le panneau latéral (N-Panel) dans la vue 3D.
+  * **Log de Coordonnées (TXT)** : Génère un fichier texte listant le nom et la position X, Y, Z (Monde) de chaque objet.
+  * **Tri Alphabétique** : Trie automatiquement la liste des objets par nom avant l'écriture.
+  * **Précision** : Arrondi automatique des coordonnées à **3 décimales**.
+  * **Batch Export FBX** : Exporte simultanément chaque objet sélectionné dans un fichier `.fbx` individuel.
+  * **Explorateur de Fichiers** : Utilise la fenêtre native de sauvegarde de Blender pour choisir le dossier de destination.
 
 ## 📝 Format de sortie (TXT)
 
-Le fichier texte généré utilise le format suivant :
+Le fichier généré (`.txt`) suit ce format strict :
 `NomObjet / X.xxx Y.yyy Z.zzz`
 
 **Exemple :**
 
 ```text
-Mirror_Eclat_00 / 10.500 0.000 25.125
-Mirror_Eclat_01 / 12.100 1.555 25.125
-Mirror_Eclat_02 / 15.000 2.000 30.000
+Asset_Arbre_01 / 12.500 4.200 0.000
+Asset_Rocher_A / -5.100 10.000 1.500
+Asset_Rocher_B / -2.000 10.000 0.000
 ```
 
-## 🛠 Installation et Utilisation
+## 📦 Installation
 
-### Prérequis
+1.  Téléchargez le fichier `export_coords_fbx.py`.
+2.  Ouvrez Blender.
+3.  Allez dans **Edit** \> **Preferences** \> **Add-ons**.
+4.  Cliquez sur le bouton **Install...** en haut à droite.
+5.  Sélectionnez le fichier `.py` téléchargé.
+6.  Cochez la case à côté de **Import-Export: Export Coords & FBX Batch** pour l'activer.
 
-  * **Version** : Testé sur 3ds Max 2021 (compatible avec la plupart des versions récentes).
-  * **Configuration FBX** : Le script utilise les **derniers paramètres d'export FBX** utilisés manuellement dans 3ds Max.
-      * *Conseil : Faites un export manuel "à blanc" une fois pour configurer vos options (Y-up/Z-up, Embed Media, etc.) avant de lancer le script.*
+## 🛠 Utilisation
 
-### Comment l'utiliser
+1.  Dans la vue 3D, appuyez sur **N** pour ouvrir le panneau latéral.
+2.  Cliquez sur l'onglet vertical **Export Tools**.
+3.  Sélectionnez les objets que vous souhaitez exporter dans la scène.
+4.  Cliquez sur le bouton **Exporter Coords & FBX**.
+5.  Une fenêtre s'ouvre : choisissez le nom du fichier texte et le dossier de destination.
+6.  L'add-on génère le fichier texte et tous les FBX correspondants.
 
-1.  Ouvrez 3ds Max.
-2.  Allez dans `Scripting` \> `Run Script...` (ou glissez-déposez le script dans la fenêtre).
-3.  Sélectionnez les objets que vous souhaitez exporter dans votre scène.
-4.  Exécutez le script.
-5.  Une fenêtre de dialogue s'ouvre : choisissez le dossier de destination et le nom du fichier texte.
-6.  Le script génère le fichier texte et tous les FBX, puis ouvre automatiquement le dossier de destination.
+## ⚙️ Détails Techniques
 
-## 📄 Code Snippet (Core Logic)
+  * **Compatibilité** : Blender 2.80 et supérieur (Testé sur 3.x/4.x).
+  * **Système de coordonnées** : Utilise `object.matrix_world` pour garantir que les positions sont absolues dans la scène.
+  * **Paramètres FBX** :
+      * `Axis Forward`: -Z
+      * `Axis Up`: Y
+      * `Use Selection`: True
 
-```maxscript
--- Extrait de la logique de tri et d'écriture
-qsort objsToSort compareNames
-for obj in objsToSort do (
-    format "% / % % %\n" obj.name sx sy sz to:theFile
-    exportFile (exportDir + obj.name + ".fbx") #noPrompt selectedOnly:true using:FBXEXP
-)
+## 📄 Extrait du code (Core)
+
+```python
+# Exemple de la boucle principale
+for obj in selected_objects:
+    # Récupération position Monde
+    loc = obj.matrix_world.translation
+    # Écriture dans le fichier
+    f.write(f"{obj.name} / {loc.x:.3f} {loc.y:.3f} {loc.z:.3f}\n")
+    
+    # Export FBX individuel
+    bpy.ops.export_scene.fbx(filepath=fbx_path, use_selection=True, ...)
 ```
 
 ## 👤 JOYxt
 
-Script créé pour automatiser le pipeline d'export vers VimontFramework
-
------
-
-**Note :** N'oubliez pas de sauvegarder votre scène avant de lancer des opérations de batch export par sécurité.
+Add-on développé pour simplifier l'export de layout vers VimontFramework

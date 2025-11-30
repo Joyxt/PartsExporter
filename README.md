@@ -62,7 +62,7 @@ for obj in objsToSort do (
 )
 ```
 
-## 👤 Skalito
+## 👤 JOYxt
 
 Script créé pour automatiser le pipeline d'export vers VimontFramework
 
